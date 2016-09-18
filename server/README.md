@@ -1,6 +1,6 @@
 # ENVIRONMENT
   Required environments
-  ```
+  ```bash
   $ node -v
   v4.5.0
   $ npm -v
@@ -22,3 +22,11 @@
 
 3. Access to the node server from web browser
   Access to `http://localhost:3000`.
+
+# HOW TO EDIT
+  - static files:/public
+  - views        :/routes /views and add next two codes at app.js
+    ```javascript
+    var routes = require('./routes/index');
+    app.use('/', routes);
+    ```
