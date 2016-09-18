@@ -9,13 +9,13 @@
 
 # HOW TO USE
 1. Install modules with the npm
-  Execute next commands at the ripository's root directory.
+  Execute next commands at the server directory.
     ```bash
     npm install && cd node_modules/bootstrap && npm install
     ```
 
 2. Ececute a node server
-  Execute next commands.
+  Execute a next command at the server directory.
     ```bash
     npm start
     ```
