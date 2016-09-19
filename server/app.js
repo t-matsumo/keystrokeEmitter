@@ -5,8 +5,9 @@ var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser   = require('body-parser');
 
-var routes = require('./routes/index');
-var signin = require('./routes/signin');
+var routes  = require('./routes/index');
+var signin  = require('./routes/signin');
+var content = require('./routes/content');
 // var users  = require('./routes/users');
 
 var app = express();
@@ -26,6 +27,7 @@ app.use(express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
 
 app.use('/', routes);
 app.use('/signin', signin);
+app.use('/content', content);
 // app.use('/users', users);
 
 // catch 404 and forward to error handler
