@@ -22,18 +22,19 @@
     <p>conetnt to <%= title %></p>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-      var socket = io.connect('http://localhost:3000');
-        socket.on('news', function (data) {
-          console.log(data);
-          socket.emit('my other event', { my: 'data' });
-        });
-    </script>
-
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
+    <script>
+      $(function() {
+        var socket = io.connect(window.location.hostname + ':' + window.location.port);
+        socket.on('news', function (data) {
+          console.log(data);
+          socket.emit('my other event', { my: 'data' });
+        });
+      });
+    </script>
   </body>
 </html>
 
