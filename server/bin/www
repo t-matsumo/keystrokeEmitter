@@ -7,7 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('apptest:server');
 var http = require('http');
-
+var socketIO = require('socket.io');
 /**
  * Get port from environment and store in Express.
  */
@@ -16,10 +16,11 @@ var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
- * Create HTTP server.
+ * Create HTTP server and socket.io server.
  */
 
 var server = http.createServer(app);
+var io = socketIO(server);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -28,6 +29,7 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+io.on('connection', onConnection);
 
 /**
  * Normalize a port into a number, string, or false.
@@ -87,4 +89,14 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+}
+
+/**
+ * Event listener for WebSocket server "connection" event.
+ */
+function onConnection(socket) {
+  socket.emit('news', { hello: 'world' });
+  socket.on('my other event', function (data) {
+    console.log(data);
+  });
 }
