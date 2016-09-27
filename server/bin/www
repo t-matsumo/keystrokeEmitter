@@ -8,6 +8,8 @@ var app = require('../app');
 var debug = require('debug')('apptest:server');
 var http = require('http');
 var socketIO = require('socket.io');
+var onConnection = require('../websocket/onConnection');
+
 /**
  * Get port from environment and store in Express.
  */
@@ -89,19 +91,4 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
-}
-
-/**
- * Event listener for WebSocket server "connection" event.
- */
-function onConnection(socket) {
-  socket.emit('news', { hello: 'world' });
-  
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
-
-  socket.on('disconnect', function () {
-    
-  });
 }
