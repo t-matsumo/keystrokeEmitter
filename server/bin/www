@@ -4,10 +4,10 @@
  * Module dependencies.
  */
 
-var app = require('../app');
-var debug = require('debug')('apptest:server');
-var http = require('http');
-var socketIO = require('socket.io');
+var app          = require('../app');
+var debug        = require('debug')('apptest:server');
+var http         = require('http');
+var socketIO     = require('socket.io');
 var onConnection = require('../websocket/onConnection');
 
 /**
