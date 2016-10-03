@@ -12,6 +12,13 @@
 #include <mutex>
 #include <condition_variable>
 #include <string>
+
+#include <windows.h>
+
+#define BIT_MASK_PUSHED_KEY 0x8000
+#define SOCKET_IO_SERVER "http://localhost:3000"
+
+
 #ifdef WIN32
 #define HIGHLIGHT(__O__) std::cout<<__O__<<std::endl
 #define EM(__O__) std::cout<<__O__<<std::endl
@@ -65,49 +72,24 @@ public:
 	}
 };
 
-int participants = -1;
-
 socket::ptr current_socket;
 
 void bind_events(socket::ptr &socket)
 {
+	current_socket->on("disconnect", sio::socket::event_listener_aux([&](string const& name, message::ptr const& data, bool isAck, message::list &ack_resp)
+	{
+		_lock.lock();
+		exit(0);
+		_lock.unlock();
+	}));
+	/*
 	current_socket->on("news", sio::socket::event_listener_aux([&](string const& name, message::ptr const& data, bool isAck, message::list &ack_resp)
 	{
 		_lock.lock();
-		string hello = data->get_map()["hello"]->get_string();
-		EM(hello);
+		処理を書く
 		_lock.unlock();
 	}));
-
-	current_socket->on("new message", sio::socket::event_listener_aux([&](string const& name, message::ptr const& data, bool isAck, message::list &ack_resp)
-	{
-		_lock.lock();
-		string user = data->get_map()["username"]->get_string();
-		string message = data->get_map()["message"]->get_string();
-		EM(user << ":" << message);
-		_lock.unlock();
-	}));
-
-	current_socket->on("user joined", sio::socket::event_listener_aux([&](string const& name, message::ptr const& data, bool isAck, message::list &ack_resp)
-	{
-		_lock.lock();
-		string user = data->get_map()["username"]->get_string();
-		participants = data->get_map()["numUsers"]->get_int();
-		bool plural = participants != 1;
-
-		//     abc "
-		HIGHLIGHT(user << " joined" << "\nthere" << (plural ? " are " : "'s ") << participants << (plural ? " participants" : " participant"));
-		_lock.unlock();
-	}));
-	current_socket->on("user left", sio::socket::event_listener_aux([&](string const& name, message::ptr const& data, bool isAck, message::list &ack_resp)
-	{
-		_lock.lock();
-		string user = data->get_map()["username"]->get_string();
-		participants = data->get_map()["numUsers"]->get_int();
-		bool plural = participants != 1;
-		HIGHLIGHT(user << " left" << "\nthere" << (plural ? " are " : "'s ") << participants << (plural ? " participants" : " participant"));
-		_lock.unlock();
-	}));
+	*/
 }
 
 MAIN_FUNC {
@@ -117,7 +99,7 @@ MAIN_FUNC {
 	h.set_open_listener(std::bind(&connection_listener::on_connected, &l));
 	h.set_close_listener(std::bind(&connection_listener::on_close, &l,std::placeholders::_1));
 	h.set_fail_listener(std::bind(&connection_listener::on_fail, &l));
-	h.connect("http://localhost:3000");
+	h.connect(SOCKET_IO_SERVER);
 	_lock.lock();
 	if (!connect_finish)
 	{
@@ -126,77 +108,26 @@ MAIN_FUNC {
 	_lock.unlock();
 	current_socket = h.socket();
 
-/*
-	Login:
-	string nickname;
-	while (nickname.length() == 0) {
-		HIGHLIGHT("Type your nickname:");
-
-		getline(cin, nickname);
-	}
-	current_socket->on("login", sio::socket::event_listener_aux([&](string const& name, message::ptr const& data, bool isAck,message::list &ack_resp) {
-		_lock.lock();
-		participants = data->get_map()["numUsers"]->get_int();
-		bool plural = participants != 1;
-		HIGHLIGHT("Welcome to Socket.IO Chat-\nthere" << (plural ? " are " : "'s ") << participants << (plural ? " participants" : " participant"));
-		_cond.notify_all();
-		_lock.unlock();
-		current_socket->off("login");
-	}));
-	current_socket->emit("add user", nickname);
-
-	_lock.lock();
-	if (participants<0) {
-		_cond.wait(_lock);
-	}
-	_lock.unlock();
-*/
 	bind_events(current_socket);
-	current_socket->emit("my other event", std::string("message from c++ client"));
-/* 	HIGHLIGHT("Start to chat,commands:\n'$exit' : exit chat\n'$nsp <namespace>' : change namespace");
-	for (std::string line; std::getline(std::cin, line);) {
-		if (line.length()>0)
-		{
-			if (line == "$exit")
-			{
-				break;
-			}
-			else if (line.length() > 5 && line.substr(0,5) == "$nsp ")
-			{
-				string new_nsp = line.substr(5);
-				if (new_nsp == current_socket->get_namespace())
-				{
-					continue;
-				}
-				current_socket->off_all();
-				current_socket->off_error();
-				//per socket.io, default nsp should never been closed.
-				if (current_socket->get_namespace() != "/")
-				{
-					current_socket->close();
-				}
-				current_socket = h.socket(new_nsp);
-				bind_events(current_socket);
-				//if change to default nsp, we do not need to login again (since it is not closed).
-				if (current_socket->get_namespace() == "/")
-				{
-					continue;
-				}
-				goto Login;
-			}
-			current_socket->emit("new message", line);
-			_lock.lock();
-			EM("\t\t\t" << line << ":" << "You");
-			_lock.unlock();
-		}
-	}
-*/
 
-	getchar();// デバッグのため一時停止
+	// 起動している間は打鍵を監視し続ける
+	std::string line("user id");
+	while (true) {
+		// キーボードの打鍵を検知する
+		for (int i = 'A'; i <= 'Z'; i++) {
+			// キーが押されると最上位ビットが1になる
+			// NOTE:GetAsyncKeyStateにすれば、割り込みで検知可能かもしれない
+			if (GetKeyState(i) & BIT_MASK_PUSHED_KEY) {
+				current_socket->emit("typedKeyboad", line);
+			}
+		}
+		Sleep(50);
+	}
+
 	HIGHLIGHT("Closing...");
 	h.sync_close();
 	h.clear_con_listeners();
-	HIGHLIGHT("Closd!!");
+
 	return 0;
 }
 
