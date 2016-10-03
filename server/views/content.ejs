@@ -20,6 +20,8 @@
   <body>
     <h1><%= title %></h1>
     <p>conetnt to <%= title %></p>
+    
+    <!-- ここに画像を入れるようにする-->
 
     <script src="/socket.io/socket.io.js"></script>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -29,10 +31,14 @@
     <script>
       $(function() {
         var socket = io.connect(window.location.hostname + ':' + window.location.port);
-
-        socket.on('news', function (data) {
-          console.log(data);
-          socket.emit('my other event', { my: 'data' });
+        socket.on('typedKeyboad', function (data) {
+          if (typeof this.i === 'undefined') {
+              this.i = 0;
+          }
+          this.i = this.i + 20;
+          console.log(this.i + ":" + data);
+          //TODO: 画像を変化させる
+          $("p").css("background", "rgb(" + this.i % 255 + ", " + this.i % 255 + ", " + this.i % 255  + ")" );
         });
 
         socket.on('disconnect', function (data) {
