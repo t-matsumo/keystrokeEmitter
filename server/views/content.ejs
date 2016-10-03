@@ -18,10 +18,7 @@
     <![endif]-->
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>conetnt to <%= title %></p>
-    
-    <!-- ここに画像を入れるようにする-->
+    <p><img src="" alt="" style="width : 100%;" /></p>
 
     <script src="/socket.io/socket.io.js"></script>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -35,10 +32,9 @@
           if (typeof this.i === 'undefined') {
               this.i = 0;
           }
-          this.i = this.i + 20;
+          this.i = (this.i + 1) % 13;
           console.log(this.i + ":" + data);
-          //TODO: 画像を変化させる
-          $("p").css("background", "rgb(" + this.i % 255 + ", " + this.i % 255 + ", " + this.i % 255  + ")" );
+          $('img').attr('src', 'images/' + this.i + '.jpg');
         });
 
         socket.on('disconnect', function (data) {
